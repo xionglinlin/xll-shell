@@ -8,6 +8,7 @@
 
 #include <QApplication>
 #include <QLoggingCategory>
+#include <QStandardPaths>
 
 DS_USE_NAMESPACE
 
@@ -79,6 +80,15 @@ int main(int argc, char *argv[])
     a.setApplicationVersion("1.0.0");
 
     qSetMessagePattern("[%{time yyyy-MM-dd hh:mm:ss.zzz}] [%{type}] [%{function}:%{line}] - %{message}");
+
+    auto dirs = QStandardPaths::standardLocations(QStandardPaths::GenericDataLocation);
+    QStringList fallbacks = QIcon::fallbackSearchPaths();
+    for (const auto fb : dirs) {
+        fallbacks << fb + QLatin1String("/icons");
+    }
+    // To Fix (developer-center#8413) Qt6 find icons will ignore ${GenericDataLocation}/icons/xxx.png
+    qDebug() << "fallback search paths:" << fallbacks;
+    QIcon::setFallbackSearchPaths(fallbacks);
 
     // 树型结构打印所有可用的插件
     for (const auto &item : DPluginLoader::instance()->rootPlugins()) {
